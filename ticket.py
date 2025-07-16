@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import openai
 
+# --- Setup OpenAI client for new SDK ---
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 st.set_page_config(page_title="Ticket Deduplication Demo", layout="wide")
 st.title("🕵️‍♂️ Ticket Deduplication Assistant")
-
-# Set your OpenAI API key (from Streamlit secrets for security)
-openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.markdown("""
 Upload your ConnectWise (or other PSA) ticket export (CSV).<br>
@@ -60,16 +60,15 @@ Summary 2:
 {t2['summary']}
 """
         with st.spinner("Asking GPT..."):
-            response = openai.ChatCompletion.create(
-                model="gpt-4o", # or "gpt-3.5-turbo"
+            response = client.chat.completions.create(
+                model="gpt-4o",  # or "gpt-3.5-turbo"
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0
             )
-            output = response["choices"][0]["message"]["content"]
+            output = response.choices[0].message.content
 
         st.success("**AI Assessment:**")
         st.markdown(f"> {output}")
 
 else:
     st.info("Upload a CSV file to get started!")
-
